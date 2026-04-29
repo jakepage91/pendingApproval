@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Item {
+  id              String    @id @default(cuid())
+  title           String
+  type            String
+  priority        String
+  context         String
+  additionalInfo  String?
+  submittedBy     String
+  submittedAt     DateTime  @default(now())
+  status          String    @default("open")
+  managerResponse String?
+  closedAt        DateTime?
+  closedBy        String?
+  attachmentUrl   String?
+  attachmentName  String?
+  delegatedTo     String?
+  delegatedBy     String?
+  includedPeople  String?
+  secondOpinions  String?
+}

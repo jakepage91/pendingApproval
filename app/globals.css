@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+/* MetalBear brand tokens — light theme default. Toggle dark via `class="dark"` on <html>. */
+:root {
+  /* MetalBear palette */
+  --mb-purple: #756df3;
+  --mb-purple-strong: #5b53e0;
+  --mb-purple-medium: #e4e3fd;
+  --mb-purple-dark: #232141;
+  --mb-yellow: #ffcb7d;
+  --mb-yellow-soft: #fff1d9;
+  --mb-blush: #f36869;
+  --mb-blush-soft: #ffe2e2;
+  --mb-black: #000000;
+  --mb-grey-light: #fafafd;
+  --mb-grey-bear: #eeeeee;
+  --mb-grey-dark: #acacac;
+
+  /* App-level vars (mapped from old --bg-base etc.) — LIGHT theme */
+  --bg-base: var(--mb-grey-light);
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-hover: #f3f2fb;
+  --bg-tint: #f6f5fc;
+  --border: #e6e4f4;
+  --border-strong: var(--mb-black);
+  --border-subtle: #ececf3;
+  --text-primary: var(--mb-black);
+  --text-secondary: #5a5870;
+  --text-muted: #8c8a9d;
+  --accent: var(--mb-purple);
+  --accent-hover: var(--mb-purple-strong);
+  --accent-subtle: rgba(117, 109, 243, 0.12);
+  --accent-fg: #ffffff;
+
+  --priority-urgent: var(--mb-blush);
+  --priority-high: #e8a14a;
+  --priority-normal: var(--mb-purple);
+  --priority-low: #b6b3c8;
+
+  --status-open: var(--mb-purple);
+  --status-inprogress: #e8a14a;
+  --status-decided: #2faa78;
+  --status-closed: #8c8a9d;
+
+  --type-approval: var(--mb-purple);
+  --type-question: #3d8bca;
+  --type-design: #d26ab2;
+
+  --shadow-card: 0 2px 0 0 var(--mb-black);
+  --shadow-pop: 0 6px 0 0 var(--mb-black);
+  --shadow-soft: 0 8px 24px rgba(35, 33, 65, 0.08);
+
+  --font-display: var(--font-fraunces, "Fraunces"), Georgia, serif;
+  --font-sans: var(--font-jakarta, "Plus Jakarta Sans"), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", monospace;
+}
+
+html.dark {
+  --bg-base: #0d0c1a;
+  --bg-surface: #18162e;
+  --bg-elevated: #20203f;
+  --bg-hover: #272653;
+  --bg-tint: #1a1834;
+  --border: #2e2c54;
+  --border-strong: #4a4884;
+  --border-subtle: #232142;
+  --text-primary: #f4f2ff;
+  --text-secondary: #c1bee0;
+  --text-muted: #7a78a0;
+  --accent: var(--mb-purple);
+  --accent-hover: #8a83f7;
+  --accent-subtle: rgba(117, 109, 243, 0.18);
+  --accent-fg: #ffffff;
+
+  --priority-urgent: var(--mb-blush);
+  --priority-high: var(--mb-yellow);
+  --priority-normal: var(--mb-purple);
+  --priority-low: #5a5880;
+
+  --status-open: var(--mb-purple);
+  --status-inprogress: var(--mb-yellow);
+  --status-decided: #5fd1a2;
+  --status-closed: #7a78a0;
+
+  --type-approval: #a8a2ff;
+  --type-question: #6db8ec;
+  --type-design: #e592ce;
+
+  --shadow-card: 0 2px 0 0 rgba(0,0,0,0.6);
+  --shadow-pop: 0 6px 0 0 rgba(0,0,0,0.6);
+  --shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button { font-family: inherit; }
+input, textarea, select { font-family: inherit; }
+
+::selection {
+  background: var(--accent-subtle);
+  color: var(--text-primary);
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Reusable utilities */
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: var(--mb-yellow);
+  color: var(--mb-black);
+  border: 1.5px solid var(--mb-black);
+  border-radius: 999px;
+  padding: 5px 12px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--mb-black);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform 100ms ease, box-shadow 100ms ease, background 120ms ease;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) { transform: translate(0, -1px); box-shadow: 0 3px 0 0 var(--mb-black); }
+.btn:active:not(:disabled) { transform: translate(0, 1px); box-shadow: 0 1px 0 0 var(--mb-black); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-primary { background: var(--mb-purple); color: #fff; }
+.btn-ghost {
+  background: transparent;
+  box-shadow: none;
+  border-color: transparent;
+}
+.btn-ghost:hover { background: var(--bg-hover); transform: none; box-shadow: none; }
+
+html.dark .btn { background: var(--bg-elevated); color: var(--text-primary); border-color: var(--border-strong); }
+html.dark .btn-primary { background: var(--mb-purple); color: #fff; border-color: var(--mb-black); }
+
+/* MetalBear diagonal-stripe background — kept for any future hero use. */
+.mb-stripes {
+  background-color: var(--mb-purple);
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255,255,255,0.07) 0 14px,
+    rgba(255,255,255,0) 14px 28px
+  );
+}
