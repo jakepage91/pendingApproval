@@ -10,6 +10,7 @@ export default auth((req) => {
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/login") ||
+    pathname.startsWith("/portraits") ||
     pathname === "/favicon.ico"
   ) {
     return NextResponse.next();
