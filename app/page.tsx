@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { signOut } from "next-auth/react";
 
 export default function Home() {
   return (
@@ -25,7 +26,7 @@ export default function Home() {
         }}
       >
         <Logo size={18} />
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span
             style={{
               fontFamily: "var(--font-mono)",
@@ -36,6 +37,32 @@ export default function Home() {
           >
             pendingApproval
           </span>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            style={{
+              padding: "6px 16px",
+              borderRadius: 999,
+              border: "1.5px solid var(--mb-black)",
+              background: "var(--bg-surface)",
+              boxShadow: "0 2px 0 0 var(--mb-black)",
+              fontSize: 12,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+              cursor: "pointer",
+              fontFamily: "var(--font-sans)",
+              transition: "transform 80ms ease, box-shadow 80ms ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow = "0 3px 0 0 var(--mb-black)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 2px 0 0 var(--mb-black)";
+            }}
+          >
+            Sign out
+          </button>
         </div>
       </header>
 
