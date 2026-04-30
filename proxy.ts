@@ -11,6 +11,7 @@ export default auth((req) => {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/portraits") ||
+    pathname.startsWith("/share") ||
     pathname === "/favicon.ico"
   ) {
     return NextResponse.next();

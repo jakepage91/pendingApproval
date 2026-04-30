@@ -146,6 +146,22 @@ export default function TeamPage() {
     return false;
   };
 
+  const deleteItem = async (id: string) => {
+    const res = await fetch(`/api/items/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setSelectedId(null);
+      setPanelOpen(false);
+      await fetchItems();
+      addToast("Request deleted.");
+    } else {
+      addToast("Failed to delete.", "error");
+    }
+  };
+
+  const shareUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/share/${currentUser}`
+    : "";
+
   if (showUserPicker) {
     return <UserPicker onSelect={selectUser} />;
   }
@@ -157,6 +173,7 @@ export default function TeamPage() {
       onClose={() => setPanelOpen(false)}
       onCloseItem={closeItem}
       onReopenItem={reopenItem}
+      onDelete={() => deleteItem(selectedItem.id)}
       onDelegate={async (to) => {
         const ok = await patchItem({ delegatedTo: to, delegatedBy: currentUser });
         if (ok) addToast(`Delegated to ${capitalize(to)}.`);
@@ -314,17 +331,21 @@ export default function TeamPage() {
             >
               + New Request
             </button>
-            <div
-              style={{
-                textAlign: "center",
-                marginTop: 8,
-                fontSize: "11px",
-                color: "var(--text-muted)",
-                fontFamily: "var(--font-mono)",
-              }}
-            >
+            <div style={{ textAlign: "center", marginTop: 8, fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
               ⌘N
             </div>
+            <button
+              onClick={() => {
+                if (shareUrl) {
+                  navigator.clipboard.writeText(shareUrl);
+                  addToast("Share link copied!");
+                }
+              }}
+              className="btn"
+              style={{ width: "100%", justifyContent: "center", marginTop: 8, fontSize: 12 }}
+            >
+              🔗 Copy share link
+            </button>
           </div>
         </aside>
 
@@ -577,6 +598,7 @@ function TeamDetailPanel({
   onClose,
   onCloseItem,
   onReopenItem,
+  onDelete,
   onDelegate,
   onRemoveDelegate,
   onUpdateInclusion,
@@ -586,6 +608,7 @@ function TeamDetailPanel({
   onClose: () => void;
   onCloseItem: () => void;
   onReopenItem: () => void;
+  onDelete: () => void;
   onDelegate: (to: Person) => Promise<void>;
   onRemoveDelegate: () => Promise<void>;
   onUpdateInclusion: (people: string[]) => Promise<void>;
@@ -593,6 +616,7 @@ function TeamDetailPanel({
   const isClosed = item.status === "closed";
   const [showDelegatePicker, setShowDelegatePicker] = useState(false);
   const [showIncludePicker, setShowIncludePicker] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [includedDraft, setIncludedDraft] = useState<string[]>(() => parseIncluded(item.includedPeople));
 
   useEffect(() => {
@@ -796,6 +820,21 @@ function TeamDetailPanel({
           <button onClick={onReopenItem} className="btn">Reopen</button>
         ) : (
           <button onClick={onCloseItem} className="btn">Close item</button>
+        )}
+        {!confirmDelete ? (
+          <button
+            onClick={() => setConfirmDelete(true)}
+            className="btn"
+            style={{ color: "var(--mb-blush)", borderColor: "var(--mb-blush)", boxShadow: "0 3px 0 0 var(--mb-blush)" }}
+          >
+            Delete
+          </button>
+        ) : (
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Sure?</span>
+            <button onClick={onDelete} className="btn" style={{ color: "var(--mb-blush)", borderColor: "var(--mb-blush)", boxShadow: "0 3px 0 0 var(--mb-blush)", fontSize: 12 }}>Yes, delete</button>
+            <button onClick={() => setConfirmDelete(false)} className="btn" style={{ fontSize: 12 }}>Cancel</button>
+          </span>
         )}
       </div>
 

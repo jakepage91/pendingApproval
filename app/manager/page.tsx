@@ -134,6 +134,18 @@ export default function ManagerPage() {
     return false;
   };
 
+  const deleteItem = async (id: string) => {
+    const res = await fetch(`/api/items/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setSelectedId(null);
+      setPanelOpen(false);
+      await fetchItems();
+      addToast("Request deleted.");
+    } else {
+      addToast("Failed to delete.", "error");
+    }
+  };
+
   if (showManagerPicker) {
     return <ManagerPicker onSelect={selectManager} />;
   }
@@ -182,6 +194,7 @@ export default function ManagerPage() {
         if (ok) addToast("Opinion saved.");
         else addToast("Failed to save.", "error");
       }}
+      onDelete={() => deleteItem(selectedItem.id)}
     />
   ) : null;
 
@@ -516,6 +529,7 @@ function ManagerDetailPanel({
   onRemoveDelegate,
   onUpdateInclusion,
   onSaveSecondOpinion,
+  onDelete,
 }: {
   item: Item;
   currentManager: Manager;
@@ -526,11 +540,13 @@ function ManagerDetailPanel({
   onRemoveDelegate: () => Promise<void>;
   onUpdateInclusion: (people: string[]) => Promise<void>;
   onSaveSecondOpinion: (body: string) => Promise<void>;
+  onDelete: () => void;
 }) {
   const [response, setResponse] = useState(item.managerResponse ?? "");
   const [saving, setSaving] = useState(false);
   const [showDelegatePicker, setShowDelegatePicker] = useState(false);
   const [showIncludePicker, setShowIncludePicker] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [includedDraft, setIncludedDraft] = useState<string[]>(() => parseIncluded(item.includedPeople));
 
   useEffect(() => {
@@ -704,6 +720,21 @@ function ManagerDetailPanel({
             )}
             <button onClick={() => onSetStatus("closed")} className="btn">Close Item</button>
           </>
+        )}
+        {!confirmDelete ? (
+          <button
+            onClick={() => setConfirmDelete(true)}
+            className="btn"
+            style={{ color: "var(--mb-blush)", borderColor: "var(--mb-blush)", boxShadow: "0 3px 0 0 var(--mb-blush)" }}
+          >
+            Delete
+          </button>
+        ) : (
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Sure?</span>
+            <button onClick={onDelete} className="btn" style={{ color: "var(--mb-blush)", borderColor: "var(--mb-blush)", boxShadow: "0 3px 0 0 var(--mb-blush)", fontSize: 12 }}>Yes, delete</button>
+            <button onClick={() => setConfirmDelete(false)} className="btn" style={{ fontSize: 12 }}>Cancel</button>
+          </span>
         )}
       </div>
 

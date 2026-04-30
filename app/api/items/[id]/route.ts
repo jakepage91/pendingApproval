@@ -52,3 +52,12 @@ export async function PATCH(
   const item = await prisma.item.update({ where: { id }, data });
   return NextResponse.json(item);
 }
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  await prisma.item.delete({ where: { id } });
+  return new NextResponse(null, { status: 204 });
+}
