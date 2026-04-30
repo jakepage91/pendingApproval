@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { signOut } from "next-auth/react";
 import { Item, TeamMember, ItemType, Priority, Person, Manager, MANAGERS, ALL_PEOPLE } from "@/lib/types";
 import { ItemRow } from "@/components/ItemRow";
 import { PriorityDot, TypeBadge, StatusBadge } from "@/components/Badges";
@@ -351,6 +352,13 @@ export default function TeamPage() {
               style={{ width: "100%", justifyContent: "center", marginTop: 8, fontSize: 12 }}
             >
               🔗 Copy share link
+            </button>
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="btn"
+              style={{ width: "100%", justifyContent: "center", marginTop: 8, fontSize: 12, color: "var(--text-muted)" }}
+            >
+              Sign out
             </button>
           </div>
         </aside>

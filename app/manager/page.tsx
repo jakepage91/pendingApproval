@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { signOut } from "next-auth/react";
 import { Item, Status, ItemType, Priority, Manager, Person, MANAGERS } from "@/lib/types";
 import { ItemRow } from "@/components/ItemRow";
 import { PriorityDot, TypeBadge, StatusBadge, PriorityLabel } from "@/components/Badges";
@@ -323,6 +324,15 @@ export default function ManagerPage() {
               );
             })}
           </nav>
+          <div style={{ padding: "12px 10px 0" }}>
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="btn"
+              style={{ width: "100%", justifyContent: "center", fontSize: 12, color: "var(--text-muted)" }}
+            >
+              Sign out
+            </button>
+          </div>
         </aside>
 
         {/* Main */}
