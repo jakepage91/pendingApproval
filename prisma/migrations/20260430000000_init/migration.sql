@@ -20,3 +20,5 @@ CREATE TABLE "Item" (
 
     CONSTRAINT "Item_pkey" PRIMARY KEY ("id")
 );
+
+ALTER TABLE "Item" ADD COLUMN "assignedManager" TEXT NOT NULL DEFAULT 'lorena';

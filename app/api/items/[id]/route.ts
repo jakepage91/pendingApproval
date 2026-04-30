@@ -21,6 +21,7 @@ export async function PATCH(
 
   const data: Record<string, unknown> = {};
   if (body.status !== undefined) data.status = body.status;
+  if (body.assignedManager !== undefined) data.assignedManager = body.assignedManager;
   if (body.managerResponse !== undefined) data.managerResponse = body.managerResponse;
   if (body.delegatedTo !== undefined) data.delegatedTo = body.delegatedTo;
   if (body.delegatedBy !== undefined) data.delegatedBy = body.delegatedBy;

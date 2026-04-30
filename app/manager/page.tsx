@@ -81,11 +81,12 @@ export default function ManagerPage() {
     setShowManagerPicker(false);
   };
 
+  const myItems = items.filter((i) => (i.assignedManager ?? "lorena") === currentManager);
   const counts = {
-    open: items.filter((i) => i.status === "open").length,
-    inprogress: items.filter((i) => i.status === "inprogress").length,
-    decided: items.filter((i) => i.status === "decided").length,
-    closed: items.filter((i) => i.status === "closed").length,
+    open: myItems.filter((i) => i.status === "open").length,
+    inprogress: myItems.filter((i) => i.status === "inprogress").length,
+    decided: myItems.filter((i) => i.status === "decided").length,
+    closed: myItems.filter((i) => i.status === "closed").length,
     delegated: items.filter((i) => i.delegatedTo === currentManager && i.status !== "closed").length,
     included: items.filter((i) => {
       try { return currentManager && JSON.parse(i.includedPeople ?? "[]").includes(currentManager) && i.status !== "closed"; }
@@ -110,7 +111,10 @@ export default function ManagerPage() {
         catch { return false; }
       });
     } else {
-      base = items.filter((i) => i.status === statusMap[navSection as Exclude<NavSection, "delegated" | "included">]);
+      base = items.filter((i) =>
+        i.status === statusMap[navSection as Exclude<NavSection, "delegated" | "included">] &&
+        (i.assignedManager ?? "lorena") === currentManager
+      );
     }
     return base.filter((i) => typeFilter === "all" || i.type === typeFilter);
   })();

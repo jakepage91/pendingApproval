@@ -26,6 +26,7 @@ export async function POST(req: Request) {
       submittedBy: body.submittedBy,
       attachmentUrl: body.attachmentUrl ?? null,
       attachmentName: body.attachmentName ?? null,
+      assignedManager: body.assignedManager ?? "lorena",
     },
   });
 

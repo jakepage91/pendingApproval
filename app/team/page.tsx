@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Item, TeamMember, ItemType, Priority, Person, ALL_PEOPLE } from "@/lib/types";
+import { Item, TeamMember, ItemType, Priority, Person, Manager, MANAGERS, ALL_PEOPLE } from "@/lib/types";
 import { ItemRow } from "@/components/ItemRow";
 import { PriorityDot, TypeBadge, StatusBadge } from "@/components/Badges";
 import { Toast, useToast } from "@/components/Toast";
@@ -175,6 +175,11 @@ export default function TeamPage() {
       onCloseItem={closeItem}
       onReopenItem={reopenItem}
       onDelete={() => deleteItem(selectedItem.id)}
+      onReassign={async (manager) => {
+        const ok = await patchItem({ assignedManager: manager });
+        if (ok) addToast(`Sent to ${capitalize(manager)}.`);
+        else addToast("Failed to reassign.", "error");
+      }}
       onDelegate={async (to) => {
         const ok = await patchItem({ delegatedTo: to, delegatedBy: currentUser });
         if (ok) addToast(`Delegated to ${capitalize(to)}.`);
@@ -600,6 +605,7 @@ function TeamDetailPanel({
   onCloseItem,
   onReopenItem,
   onDelete,
+  onReassign,
   onDelegate,
   onRemoveDelegate,
   onUpdateInclusion,
@@ -610,6 +616,7 @@ function TeamDetailPanel({
   onCloseItem: () => void;
   onReopenItem: () => void;
   onDelete: () => void;
+  onReassign: (manager: Manager) => Promise<void>;
   onDelegate: (to: Person) => Promise<void>;
   onRemoveDelegate: () => Promise<void>;
   onUpdateInclusion: (people: string[]) => Promise<void>;
@@ -730,6 +737,41 @@ function TeamDetailPanel({
           ))}
         </div>
       )}
+
+      {/* Manager assignment toggle */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontFamily: "var(--font-mono)" }}>
+          Send to
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          {MANAGERS.map((m) => {
+            const active = (item.assignedManager ?? "lorena") === m;
+            return (
+              <button
+                key={m}
+                onClick={() => !active && onReassign(m)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "8px 14px",
+                  border: `2px solid ${active ? "var(--mb-black)" : "var(--border)"}`,
+                  borderRadius: 10,
+                  background: active ? "var(--bg-surface)" : "transparent",
+                  boxShadow: active ? "0 3px 0 0 var(--mb-black)" : "none",
+                  cursor: active ? "default" : "pointer",
+                  fontWeight: active ? 700 : 500,
+                  fontSize: 13,
+                  color: active ? "var(--text-primary)" : "var(--text-muted)",
+                  transition: "all 80ms ease",
+                }}
+              >
+                <Avatar name={m} size={20} />
+                {capitalize(m)}
+                {active && <span style={{ fontSize: 10, color: "var(--accent)", fontFamily: "var(--font-mono)", fontWeight: 700 }}>✓</span>}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       <Section label="Context">{item.context}</Section>
       {item.additionalInfo && <Section label="Additional Info">{item.additionalInfo}</Section>}
@@ -987,6 +1029,7 @@ type NewRequestFormData = {
   submittedBy: TeamMember;
   attachmentUrl?: string;
   attachmentName?: string;
+  assignedManager: Manager;
 };
 
 function NewRequestModal({
@@ -1007,6 +1050,7 @@ function NewRequestModal({
     context: "",
     additionalInfo: "",
     submittedBy,
+    assignedManager: "lorena",
   });
   const [submitting, setSubmitting] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -1137,6 +1181,36 @@ function NewRequestModal({
               </select>
             </Field>
           </div>
+
+          <Field label="Send to">
+            <div style={{ display: "flex", gap: 8 }}>
+              {MANAGERS.map((m) => {
+                const active = form.assignedManager === m;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setForm({ ...form, assignedManager: m })}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 8,
+                      padding: "8px 14px",
+                      border: `2px solid ${active ? "var(--mb-black)" : "var(--border)"}`,
+                      borderRadius: 10,
+                      background: active ? "var(--bg-surface)" : "transparent",
+                      boxShadow: active ? "0 3px 0 0 var(--mb-black)" : "none",
+                      cursor: "pointer",
+                      fontWeight: active ? 700 : 500,
+                      fontSize: 13,
+                      color: active ? "var(--text-primary)" : "var(--text-muted)",
+                    }}
+                  >
+                    <Avatar name={m} size={20} />
+                    {capitalize(m)}
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
 
           <Field label="Context *">
             <textarea

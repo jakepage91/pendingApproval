@@ -35,6 +35,7 @@ export interface Item {
   delegatedBy: string | null;
   includedPeople: string | null;
   secondOpinions: string | null;
+  assignedManager: Manager;
 }
 
 export interface SecondOpinion {
@@ -52,6 +53,7 @@ export interface CreateItemInput {
   submittedBy: TeamMember;
   attachmentUrl?: string;
   attachmentName?: string;
+  assignedManager?: Manager;
 }
 
 export interface UpdateItemInput {

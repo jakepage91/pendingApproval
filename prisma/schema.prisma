@@ -25,4 +25,5 @@ model Item {
   delegatedBy     String?
   includedPeople  String?
   secondOpinions  String?
+  assignedManager String  @default("lorena")
 }
