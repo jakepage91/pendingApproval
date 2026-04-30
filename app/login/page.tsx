@@ -228,13 +228,13 @@ function LoginContent() {
 
         <ManagerCard
           name="Lorena"
-          title="Engineering Manager"
+          title="Head of Marketing"
           imageSrc="/portraits/lorena.png"
           accent="var(--accent)"
         />
         <ManagerCard
           name="Eyal"
-          title="Engineering Manager"
+          title="CTO & Co-founder"
           imageSrc="/portraits/eyal.png"
           accent="var(--mb-yellow)"
         />
