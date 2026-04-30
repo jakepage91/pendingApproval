@@ -1,6 +1,6 @@
 {
   "buildCommand": "prisma generate && next build",
-  "installCommand": "npm install && prisma generate && prisma migrate deploy",
+  "installCommand": "npm install && npx prisma generate && npx prisma migrate deploy",
   "crons": [
     {
       "path": "/api/cleanup",
