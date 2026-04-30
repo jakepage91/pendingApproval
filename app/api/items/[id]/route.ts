@@ -20,13 +20,17 @@ async function sendResponseNotification({
   response: string;
   itemId: string;
 }) {
-  if (!process.env.RESEND_API_KEY) return;
+  if (!process.env.RESEND_API_KEY) {
+    console.error("[email] RESEND_API_KEY not set — skipping notification");
+    return;
+  }
   const resend = new Resend(process.env.RESEND_API_KEY);
   const toEmail = `${submittedBy}@metalbear.com`;
   const appUrl = process.env.AUTH_URL ?? "https://approvalpending.vercel.app";
+  const fromAddress = process.env.EMAIL_FROM ?? "ApprovalPending <onboarding@resend.dev>";
 
-  await resend.emails.send({
-    from: "ApprovalPending <noreply@metalbear.com>",
+  const result = await resend.emails.send({
+    from: fromAddress,
     to: toEmail,
     subject: `${capitalize(managerName)} responded to "${itemTitle}"`,
     html: `
@@ -56,6 +60,8 @@ async function sendResponseNotification({
       </div>
     `,
   });
+  if (result.error) console.error("[email] send failed:", result.error);
+  else console.log("[email] sent to", toEmail);
 }
 
 export async function GET(
@@ -122,7 +128,7 @@ export async function PATCH(
       itemTitle: item.title,
       response: body.managerResponse,
       itemId: id,
-    }).catch(() => {}); // fire-and-forget, don't block the response
+    }).catch((e: unknown) => console.error("[email] exception:", e));
   }
 
   return NextResponse.json(item);
