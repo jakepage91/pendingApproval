@@ -10,10 +10,17 @@ const PRIORITY_COLOR: Record<string, string> = {
   low: "#aaa",
 };
 
+const PRIORITY_EMOJI: Record<string, string> = {
+  urgent: "🚨",
+  high: "🔴",
+  normal: "🟡",
+  low: "⚪",
+};
+
 const TYPE_LABEL: Record<string, string> = {
-  approval: "Approval",
-  question: "Question",
-  design: "Design",
+  approval: "✅ Approval",
+  question: "❓ Question",
+  design: "🎨 Design",
 };
 
 function capitalize(s: string) {
@@ -44,10 +51,15 @@ export async function generateMetadata({
   const count = items.length;
 
   const title = count > 0
-    ? `${name} is waiting for your decision on ${count} topic${count === 1 ? "" : "s"}`
-    : `${name} has no pending requests`;
+    ? `⏳ ${name} is waiting for your decision on ${count} topic${count === 1 ? "" : "s"}`
+    : `✅ ${name} has no pending requests`;
 
-  const description = items.map((i, idx) => `${idx + 1}. ${i.title}`).join("\n");
+  const description = items
+    .map((i) => `${PRIORITY_EMOJI[i.priority] ?? "•"} ${i.title}`)
+    .join("\n");
+
+  const appUrl = process.env.AUTH_URL ?? "https://approvalpending.vercel.app";
+  const imageUrl = `${appUrl}/portraits/${person}.png`;
 
   return {
     title,
@@ -56,11 +68,13 @@ export async function generateMetadata({
       title,
       description,
       type: "website",
+      images: [{ url: imageUrl, width: 400, height: 400 }],
     },
     twitter: {
       card: "summary",
       title,
       description,
+      images: [imageUrl],
     },
   };
 }
@@ -178,7 +192,7 @@ export default async function SharePage({
                         letterSpacing: "0.1em",
                       }}
                     >
-                      {item.priority}
+                      {PRIORITY_EMOJI[item.priority]} {item.priority}
                     </span>
                     <span style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
                       {TYPE_LABEL[item.type] ?? item.type}
