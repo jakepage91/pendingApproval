@@ -10,22 +10,24 @@ const PRIORITY_COLOR: Record<string, string> = {
   low: "#aaa",
 };
 
-const PRIORITY_EMOJI: Record<string, string> = {
-  urgent: "🚨",
-  high: "🔴",
-  normal: "🟡",
-  low: "⚪",
+const PRIORITY_LABEL: Record<string, string> = {
+  urgent: "Urgent",
+  high: "High",
+  normal: "Normal",
+  low: "Low",
 };
 
 const TYPE_LABEL: Record<string, string> = {
-  approval: "✅ Approval",
-  question: "❓ Question",
-  design: "🎨 Design",
+  approval: "Approval",
+  question: "Question",
+  design: "Design",
 };
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+
+type Item = Awaited<ReturnType<typeof getTopItems>>[number];
 
 async function getTopItems(person: string) {
   const items = await prisma.item.findMany({
@@ -37,7 +39,18 @@ async function getTopItems(person: string) {
   });
   return items
     .sort((a, b) => (PRIORITY_RANK[a.priority] ?? 9) - (PRIORITY_RANK[b.priority] ?? 9))
-    .slice(0, 5);
+    .slice(0, 8);
+}
+
+function groupByPriority(items: Item[]): [string, Item[]][] {
+  const groups: Record<string, Item[]> = {};
+  for (const item of items) {
+    if (!groups[item.priority]) groups[item.priority] = [];
+    groups[item.priority].push(item);
+  }
+  return (["urgent", "high", "normal", "low"] as const)
+    .filter((p) => groups[p]?.length)
+    .map((p) => [p, groups[p]]);
 }
 
 export async function generateMetadata({
@@ -51,12 +64,16 @@ export async function generateMetadata({
   const count = items.length;
 
   const title = count > 0
-    ? `⏳ ${name} is waiting for your decision on ${count} topic${count === 1 ? "" : "s"}`
-    : `✅ ${name} has no pending requests`;
+    ? `${name} is waiting for your decision on ${count} topic${count === 1 ? "" : "s"}`
+    : `${name} has no pending requests`;
 
-  const description = items
-    .map((i) => `${PRIORITY_EMOJI[i.priority] ?? "•"} ${i.title}`)
-    .join("\n");
+  // Group by priority for the description
+  const groups = groupByPriority(items);
+  const description = groups
+    .map(([priority, group]) =>
+      `${PRIORITY_LABEL[priority]}:\n${group.map((i) => `• ${i.title}`).join("\n")}`
+    )
+    .join("\n\n");
 
   const appUrl = process.env.AUTH_URL ?? "https://approvalpending.vercel.app";
   const imageUrl = `${appUrl}/portraits/${person}.png`;
@@ -87,6 +104,7 @@ export default async function SharePage({
   const { person } = await params;
   const name = capitalize(person);
   const items = await getTopItems(person);
+  const groups = groupByPriority(items);
 
   return (
     <div
@@ -133,85 +151,105 @@ export default async function SharePage({
           </h1>
           {items.length > 0 && (
             <p style={{ color: "var(--text-secondary)", fontSize: 15, lineHeight: 1.5 }}>
-              Top {items.length} open request{items.length === 1 ? "" : "s"}, sorted by priority.
-              <br />
-              Sign in to respond.
+              {items.length} open request{items.length === 1 ? "" : "s"} · Sign in to respond.
             </p>
           )}
         </div>
 
-        {/* Items list */}
-        {items.length > 0 ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {items.map((item, idx) => (
-              <div
-                key={item.id}
-                style={{
-                  background: "var(--bg-surface)",
-                  border: "2px solid var(--mb-black)",
-                  borderRadius: 14,
-                  padding: "16px 20px",
-                  boxShadow: "0 4px 0 0 var(--mb-black)",
-                  display: "flex",
-                  gap: 16,
-                  alignItems: "flex-start",
-                }}
-              >
+        {/* Grouped by priority */}
+        {groups.length > 0 ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+            {groups.map(([priority, group]) => (
+              <div key={priority}>
+                {/* Priority section header */}
                 <div
                   style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: "50%",
-                    background: PRIORITY_COLOR[item.priority] ?? "var(--accent)",
-                    border: "2px solid var(--mb-black)",
-                    flexShrink: 0,
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 800,
-                    fontSize: 13,
-                    color: "#fff",
-                    marginTop: 2,
+                    gap: 10,
+                    marginBottom: 10,
+                    paddingBottom: 8,
+                    borderBottom: `2px solid ${PRIORITY_COLOR[priority]}`,
                   }}
                 >
-                  {idx + 1}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 15, color: "var(--text-primary)", marginBottom: 4, lineHeight: 1.3 }}>
-                    {item.title}
-                  </div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 700,
-                        color: PRIORITY_COLOR[item.priority],
-                        fontFamily: "var(--font-mono)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.1em",
-                      }}
-                    >
-                      {PRIORITY_EMOJI[item.priority]} {item.priority}
-                    </span>
-                    <span style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
-                      {TYPE_LABEL[item.type] ?? item.type}
-                    </span>
-                  </div>
-                  <p
+                  <span
                     style={{
-                      marginTop: 6,
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      background: PRIORITY_COLOR[priority],
+                      flexShrink: 0,
+                      border: "1.5px solid var(--mb-black)",
+                      boxShadow: `0 0 0 3px ${PRIORITY_COLOR[priority]}33`,
+                    }}
+                  />
+                  <span
+                    style={{
                       fontSize: 13,
-                      color: "var(--text-secondary)",
-                      lineHeight: 1.55,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
+                      fontWeight: 800,
+                      color: PRIORITY_COLOR[priority],
+                      textTransform: "uppercase",
+                      letterSpacing: "0.12em",
+                      fontFamily: "var(--font-mono)",
                     }}
                   >
-                    {item.context}
-                  </p>
+                    {PRIORITY_LABEL[priority]}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: PRIORITY_COLOR[priority],
+                      background: `${PRIORITY_COLOR[priority]}1a`,
+                      border: `1px solid ${PRIORITY_COLOR[priority]}44`,
+                      borderRadius: 999,
+                      padding: "1px 8px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {group.length}
+                  </span>
+                </div>
+
+                {/* Items under this priority */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {group.map((item) => (
+                    <div
+                      key={item.id}
+                      style={{
+                        background: "var(--bg-surface)",
+                        border: "2px solid var(--mb-black)",
+                        borderLeft: `4px solid ${PRIORITY_COLOR[item.priority]}`,
+                        borderRadius: 10,
+                        padding: "12px 16px",
+                        boxShadow: "0 3px 0 0 var(--mb-black)",
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, fontSize: 14, color: "var(--text-primary)", marginBottom: 4, lineHeight: 1.3 }}>
+                        {item.title}
+                      </div>
+                      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: item.context ? 6 : 0 }}>
+                        <span style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
+                          {TYPE_LABEL[item.type] ?? item.type}
+                        </span>
+                      </div>
+                      {item.context && (
+                        <p
+                          style={{
+                            fontSize: 13,
+                            color: "var(--text-secondary)",
+                            lineHeight: 1.55,
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            margin: 0,
+                          }}
+                        >
+                          {item.context}
+                        </p>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
@@ -234,7 +272,7 @@ export default async function SharePage({
         <p
           style={{
             textAlign: "center",
-            marginTop: 28,
+            marginTop: 32,
             fontSize: 12,
             color: "var(--text-muted)",
             fontFamily: "var(--font-mono)",
