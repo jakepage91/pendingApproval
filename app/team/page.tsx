@@ -73,7 +73,6 @@ export default function TeamPage() {
 
   useEffect(() => {
     fetchItems();
-    fetch("/api/seed", { method: "POST" }).then(() => fetchItems());
     const poll = setInterval(fetchItems, 15000);
     return () => clearInterval(poll);
   }, [fetchItems]);
