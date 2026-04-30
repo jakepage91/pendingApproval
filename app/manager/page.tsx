@@ -683,10 +683,23 @@ function ManagerDetailPanel({
         </div>
       )}
 
+      {/* Saved response bubble — always visible once a response exists */}
+      {item.managerResponse && (
+        <div style={{ marginTop: 20, padding: 18, background: "var(--mb-yellow-soft)", border: "1.5px solid var(--mb-black)", borderRadius: 12, boxShadow: "0 3px 0 0 var(--mb-black)" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+            <Avatar name={item.closedBy ?? currentManager} size={22} ring />
+            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--mb-black)", textTransform: "uppercase", letterSpacing: "0.12em" }}>
+              Your response
+            </span>
+          </div>
+          <p style={{ color: "var(--mb-black)", fontSize: 14, lineHeight: 1.6, whiteSpace: "pre-wrap", margin: 0 }}>{item.managerResponse}</p>
+        </div>
+      )}
+
       {item.status !== "closed" && (
-        <div style={{ marginTop: 20 }}>
+        <div style={{ marginTop: 16 }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontFamily: "var(--font-mono)" }}>
-            Your Response
+            {item.managerResponse ? "Edit response" : "Your Response"}
           </div>
           <textarea
             value={response}
@@ -698,16 +711,6 @@ function ManagerDetailPanel({
           <button onClick={handleSave} disabled={saving} className="btn btn-primary" style={{ marginTop: 10 }}>
             {saving ? "Saving…" : "Save Response"}
           </button>
-        </div>
-      )}
-
-      {item.managerResponse && item.status === "closed" && (
-        <div style={{ marginTop: 20, padding: 18, background: "var(--mb-yellow-soft)", border: "1.5px solid var(--mb-black)", borderRadius: 12, boxShadow: "0 3px 0 0 var(--mb-black)" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-            <Avatar name={item.closedBy ?? currentManager} size={22} ring />
-            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--mb-black)", textTransform: "uppercase", letterSpacing: "0.12em" }}>Response</span>
-          </div>
-          <p style={{ color: "var(--mb-black)", fontSize: 14, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{item.managerResponse}</p>
         </div>
       )}
 

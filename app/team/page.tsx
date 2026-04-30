@@ -55,6 +55,7 @@ export default function TeamPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
+  const [seenResponses, setSeenResponses] = useState<Record<string, string>>({});
   const { toasts, addToast, removeToast } = useToast();
 
   useEffect(() => {
@@ -64,6 +65,10 @@ export default function TeamPage() {
     } else {
       setShowUserPicker(true);
     }
+    try {
+      const raw = localStorage.getItem("ap_seen_responses");
+      if (raw) setSeenResponses(JSON.parse(raw));
+    } catch { /* ignore */ }
   }, []);
 
   const fetchItems = useCallback(async () => {
@@ -107,6 +112,20 @@ export default function TeamPage() {
   });
 
   const selectedItem = items.find((i) => i.id === selectedId) ?? null;
+
+  const markResponseSeen = (itemId: string, response: string) => {
+    setSeenResponses((prev) => {
+      const next = { ...prev, [itemId]: response };
+      localStorage.setItem("ap_seen_responses", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const unreadIds = new Set(
+    items
+      .filter((i) => i.managerResponse && seenResponses[i.id] !== i.managerResponse)
+      .map((i) => i.id)
+  );
 
   const counts = {
     mine: items.filter((i) => i.submittedBy === currentUser).length,
@@ -384,9 +403,11 @@ export default function TeamPage() {
                     key={item.id}
                     item={item}
                     selected={selectedId === item.id}
+                    hasUnread={unreadIds.has(item.id)}
                     onClick={() => {
                       setSelectedId(item.id);
                       setPanelOpen(true);
+                      if (item.managerResponse) markResponseSeen(item.id, item.managerResponse);
                     }}
                   />
                 ))}
@@ -838,7 +859,7 @@ function TeamDetailPanel({
               marginBottom: 10,
             }}
           >
-            <Avatar name="lorena" size={22} ring />
+            <Avatar name={item.assignedManager ?? "lorena"} size={22} ring />
             <span
               style={{
                 fontSize: 11,
@@ -848,7 +869,7 @@ function TeamDetailPanel({
                 letterSpacing: "0.12em",
               }}
             >
-              Lorena&rsquo;s Response
+              {capitalize(item.assignedManager ?? "lorena")}&rsquo;s Response
             </span>
           </div>
           <p

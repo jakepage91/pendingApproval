@@ -7,6 +7,7 @@ import { Avatar } from "./Avatar";
 type Props = {
   item: Item;
   selected: boolean;
+  hasUnread?: boolean;
   onClick: () => void;
 };
 
@@ -19,7 +20,7 @@ function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-export function ItemRow({ item, selected, onClick }: Props) {
+export function ItemRow({ item, selected, hasUnread, onClick }: Props) {
   return (
     <button
       onClick={onClick}
@@ -50,15 +51,37 @@ export function ItemRow({ item, selected, onClick }: Props) {
       <span
         style={{
           flex: 1,
-          color: "var(--text-primary)",
-          fontSize: "13.5px",
-          fontWeight: 500,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          minWidth: 0,
         }}
       >
-        {item.title}
+        <span
+          style={{
+            flex: 1,
+            color: "var(--text-primary)",
+            fontSize: "13.5px",
+            fontWeight: 500,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {item.title}
+        </span>
+        {hasUnread && (
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: "var(--accent)",
+              border: "1.5px solid var(--bg-surface)",
+              flexShrink: 0,
+            }}
+          />
+        )}
       </span>
       <TypeBadge type={item.type} />
       <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
