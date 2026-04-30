@@ -11,15 +11,21 @@ export default auth((req) => {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/portraits") ||
-    pathname.startsWith("/share") ||
     pathname === "/favicon.ico"
   ) {
     return NextResponse.next();
   }
 
+  // /share/* — let OG crawlers (Slack, etc.) through; redirect real browsers
+  if (pathname.startsWith("/share")) {
+    const ua = req.headers.get("user-agent") ?? "";
+    const isBot = /slackbot|twitterbot|facebookexternalhit|linkedinbot|whatsapp|telegram|discordbot|googlebot/i.test(ua);
+    if (isBot) return NextResponse.next();
+    return NextResponse.redirect(new URL(req.auth ? "/manager" : "/login", req.url));
+  }
+
   if (!req.auth) {
-    const loginUrl = new URL("/login", req.url);
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
   if (pathname === "/") {
